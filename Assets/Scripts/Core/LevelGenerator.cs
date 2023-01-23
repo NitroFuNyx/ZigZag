@@ -63,7 +63,7 @@ public class LevelGenerator : MonoBehaviour
         _newPosition = _lastPosition;
         var rand = Random.Range(0, 2);
         Debug.Log(PlatformsList.Count);
-        if (rand > 0 || _platformsList.Count == 1) 
+        if (rand > 0 || _platformsList.Count == 0) 
             _newPosition.x += 2f;
         else
             _newPosition.z += 2f;
@@ -75,7 +75,6 @@ public class LevelGenerator : MonoBehaviour
         {
             if (!_pauseGameHandler.IsGamePaused&&_platformsList.Count<=35)
             {
-                Debug.Log(_platformsList.Count+ " amount");
                 GenerateNewPosition();
                 var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform);
 
@@ -129,7 +128,6 @@ public class LevelGenerator : MonoBehaviour
 
     private void RemoveFromList()
     {
-        Debug.Log("Removed");
         PlatformsList.Pop();
     }
 }
