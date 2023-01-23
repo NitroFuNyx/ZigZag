@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b6e11dd8bbf98f41b5edec3b47e8231, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _canvasGroup: {fileID: 1604712732143957033}
+  canvasGroup: {fileID: 0}
 --- !u!225 &1604712732143957033
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -392,8 +392,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gem: {fileID: 4619241969142713034}
   interactionHandler: {fileID: 4203880571764281844}
-  playerHelper: {fileID: 0}
-  direction: 0
+  boxCollider: {fileID: 1925646720439468627}
+  _platformCleaner: {fileID: 6018792064494723659}
 --- !u!114 &6018792064494723659
 MonoBehaviour:
   m_ObjectHideFlags: 0

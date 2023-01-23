@@ -1,11 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
 public class LevelGenerator : MonoBehaviour
 {
     [SerializeField] private GemHolder platformPrefab;
-    [SerializeField] private Transform lastPlatform;
+    [SerializeField] private GemHolder firstPlatform;
 
     private Vector3 _lastPosition;
     private Vector3 _newPosition;
@@ -15,6 +16,10 @@ public class LevelGenerator : MonoBehaviour
     private GameManager _gameManager;
     private PauseGameHandler _pauseGameHandler;
     private SoundManager _soundManager;
+
+    [SerializeField] private Stack<GemHolder> _platformsList = new Stack<GemHolder>();
+    
+    public Stack<GemHolder> PlatformsList => _platformsList;
 
     #region ZenJect
 
@@ -44,6 +49,7 @@ public class LevelGenerator : MonoBehaviour
     #endregion
     private void StartGame()
     {
+        _platformsList.Push(firstPlatform);
         StartCoroutine(SpawnPlatform());
     }
 
@@ -56,7 +62,8 @@ public class LevelGenerator : MonoBehaviour
     {
         _newPosition = _lastPosition;
         var rand = Random.Range(0, 2);
-        if (rand > 0)
+        Debug.Log(PlatformsList.Count);
+        if (rand > 0 || _platformsList.Count == 1) 
             _newPosition.x += 2f;
         else
             _newPosition.z += 2f;
@@ -66,21 +73,24 @@ public class LevelGenerator : MonoBehaviour
     {
         while (!_isStopped)
         {
-            if (!_pauseGameHandler.IsGamePaused)
+            if (!_pauseGameHandler.IsGamePaused&&_platformsList.Count<=35)
             {
+                Debug.Log(_platformsList.Count+ " amount");
                 GenerateNewPosition();
                 var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform);
 
                 _lastPosition = _newPosition;
-
+                PlatformsList.Push(platform);
                 if (Random.Range(0f, 100f) > 85f)
                 {
                     SpawnGem(platform);
                     platform.Handler.OnBeingCaptured += _playerScore.PointAcquiredReaction;
                     platform.Handler.OnBeingCaptured += _soundManager.PlaySoundCoin;
                 }
+                
+                platform.Cleaner.OnDestroy += RemoveFromList;
 
-                yield return new WaitForSeconds(0.25f);
+                yield return new WaitForSeconds(0.1f);
             }
 
             yield return null;
@@ -89,13 +99,16 @@ public class LevelGenerator : MonoBehaviour
 
     public IEnumerator GenerateStartMap()
     {
-        _lastPosition = lastPlatform.position;
+        _lastPosition = firstPlatform.transform.position;
         for (var i = 0; i < 15; i++)
         {
             GenerateNewPosition();
             var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform);
 
             _lastPosition = _newPosition;
+            PlatformsList.Push(platform);
+
+
             if (Random.Range(0f, 100f) > 85f)
             {
                 SpawnGem(platform);
@@ -104,6 +117,7 @@ public class LevelGenerator : MonoBehaviour
                 platform.Handler.OnBeingCaptured += _soundManager.PlaySoundCoin;
             }
 
+            platform.Cleaner.OnDestroy += RemoveFromList;
             yield return null;
         }
     }
@@ -111,5 +125,11 @@ public class LevelGenerator : MonoBehaviour
     private void SpawnGem(GemHolder platform)
     {
         platform.ShowGem();
+    }
+
+    private void RemoveFromList()
+    {
+        Debug.Log("Removed");
+        PlatformsList.Pop();
     }
 }
