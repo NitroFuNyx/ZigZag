@@ -4,12 +4,11 @@ public class GemHolder : MonoBehaviour
 {
     [SerializeField] private GameObject gem;
     [SerializeField] private InteractionHandler interactionHandler;
-    [SerializeField] private BoxCollider boxCollider;
     [SerializeField] private PlatformCleaner _platformCleaner;
-
     public InteractionHandler Handler => interactionHandler;
 
     public PlatformCleaner Cleaner => _platformCleaner;
+
 
 
     public void ShowGem()

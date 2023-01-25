@@ -4,10 +4,12 @@ using Zenject;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed;
+    [SerializeField]private float moveSpeed=6;
     private bool _isFacedRight = true;
     private GameManager _gameManager;
     private PauseGameHandler _pauseGameHandler;
+
+    public float MoveSpeed => moveSpeed;
 
     #region Zenject
 
@@ -25,8 +27,15 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_pauseGameHandler.IsGamePaused)
         {
-            Move();
-            GetRotationInput();
+
+            if(!_gameManager.CheatMode)
+            {
+                Move();
+
+                GetRotationInput();
+                
+            }
+
         }
     }
 
@@ -52,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move()
     {
-        transform.position += transform.right * moveSpeed * Time.deltaTime;
+        transform.position += transform.right * MoveSpeed * Time.deltaTime;
     }
 
     private void GetRotationInput()

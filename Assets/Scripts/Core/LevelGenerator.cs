@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using Random = UnityEngine.Random;
 
 public class LevelGenerator : MonoBehaviour
 {
@@ -17,16 +19,19 @@ public class LevelGenerator : MonoBehaviour
     private PauseGameHandler _pauseGameHandler;
     private SoundManager _soundManager;
 
-    [SerializeField] private Stack<GemHolder> _platformsList = new Stack<GemHolder>();
-    
-    public Stack<GemHolder> PlatformsList => _platformsList;
+    [SerializeField] private List<GemHolder> _platformsStack = new List<GemHolder>();
+    private WaypointMover _waypointMover;
+
+    public List<GemHolder> PlatformsStack => _platformsStack;
+
 
     #region ZenJect
 
     [Inject]
     private void InjectDependencies(PlayerScore playerScore, GameManager gameManager, PauseGameHandler pauseGameHandler,
-        SoundManager soundManager)
+        SoundManager soundManager,WaypointMover waypointMover)
     {
+        _waypointMover = waypointMover;
         _soundManager = soundManager;
         _pauseGameHandler = pauseGameHandler;
         _gameManager = gameManager;
@@ -47,9 +52,14 @@ public class LevelGenerator : MonoBehaviour
         _gameManager.OnGameStart -= StartGame;
     }
     #endregion
+
+    private void Awake()
+    {
+        Debug.Log(_waypointMover);
+    }
+
     private void StartGame()
     {
-        _platformsList.Push(firstPlatform);
         StartCoroutine(SpawnPlatform());
     }
 
@@ -62,31 +72,38 @@ public class LevelGenerator : MonoBehaviour
     {
         _newPosition = _lastPosition;
         var rand = Random.Range(0, 2);
-        Debug.Log(PlatformsList.Count);
-        if (rand > 0 || _platformsList.Count == 0) 
+        if (rand > 0 || PlatformsStack.Count == 1)
+        {
             _newPosition.x += 2f;
+            
+        }
         else
+        {
             _newPosition.z += 2f;
+        }
+        
+
     }
 
     private IEnumerator SpawnPlatform()
     {
         while (!_isStopped)
         {
-            if (!_pauseGameHandler.IsGamePaused&&_platformsList.Count<=35)
+            if (!_pauseGameHandler.IsGamePaused&&PlatformsStack.Count<=35)
             {
                 GenerateNewPosition();
-                var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform);
+                var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform.GetChild(0));
 
                 _lastPosition = _newPosition;
-                PlatformsList.Push(platform);
+                PlatformsStack.Add(platform);
+                _waypointMover.AddWaypoint(platform.transform);
                 if (Random.Range(0f, 100f) > 85f)
                 {
                     SpawnGem(platform);
                     platform.Handler.OnBeingCaptured += _playerScore.PointAcquiredReaction;
                     platform.Handler.OnBeingCaptured += _soundManager.PlaySoundCoin;
                 }
-                
+
                 platform.Cleaner.OnDestroy += RemoveFromList;
 
                 yield return new WaitForSeconds(0.1f);
@@ -102,11 +119,11 @@ public class LevelGenerator : MonoBehaviour
         for (var i = 0; i < 15; i++)
         {
             GenerateNewPosition();
-            var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform);
+            var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform.GetChild(0));
 
             _lastPosition = _newPosition;
-            PlatformsList.Push(platform);
-
+            PlatformsStack.Add(platform);
+            _waypointMover.AddWaypoint(platform.transform);
 
             if (Random.Range(0f, 100f) > 85f)
             {
@@ -115,7 +132,6 @@ public class LevelGenerator : MonoBehaviour
                 platform.Handler.OnBeingCaptured += _playerScore.PointAcquiredReaction;
                 platform.Handler.OnBeingCaptured += _soundManager.PlaySoundCoin;
             }
-
             platform.Cleaner.OnDestroy += RemoveFromList;
             yield return null;
         }
@@ -128,6 +144,14 @@ public class LevelGenerator : MonoBehaviour
 
     private void RemoveFromList()
     {
-        PlatformsList.Pop();
+        PlatformsStack.RemoveAt(0);
+        for(var i = PlatformsStack.Count - 1; i > -1; i--)
+        {
+            if (PlatformsStack[i] == null)
+                PlatformsStack.RemoveAt(i);
+        }
     }
+
+   
+    
 }

@@ -1,10 +1,11 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Zenject;
 
 public class GameManager : MonoBehaviour
 {
-    private bool _isGameStarted;
+    [SerializeField] private bool _isGameStarted;
     private LevelGenerator _levelGenerator;
     private PlayerMovement _playerMovement;
     private StartGameUI _startGameUI;
@@ -12,10 +13,17 @@ public class GameManager : MonoBehaviour
     private InGameUI _inGameUI;
     private PauseGameHandler _pauseGameHandler;
 
+    [SerializeField] private bool isCheatModeEnabled;
+    private WaypointMover _waypointMover;
+    public bool CheatMode => isCheatModeEnabled;
+
+    public bool IsGameStarted => _isGameStarted;
+
     #region events
 
     public event Action OnGameFinish;
     public event Action OnGameStart;
+
 
 
     public void OnGameFinishCommand()
@@ -29,14 +37,14 @@ public class GameManager : MonoBehaviour
     }
 
     #endregion
-
-
+    
     #region Zenject
 
     [Inject]
     private void InjectDependencies(LevelGenerator levelGenerator, PlayerMovement playerMovement,
-        StartGameUI startGameUI, GameOverUI gameOverUI, InGameUI inGameUI, PauseGameHandler pauseGameHandler)
+        StartGameUI startGameUI, GameOverUI gameOverUI, InGameUI inGameUI, PauseGameHandler pauseGameHandler,WaypointMover waypointMover)
     {
+        _waypointMover = waypointMover;
         _pauseGameHandler = pauseGameHandler;
         _inGameUI = inGameUI;
         _gameOverUI = gameOverUI;
@@ -59,11 +67,13 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (!_isGameStarted && Input.GetMouseButtonDown(0)) StartGame();
+        if (!IsGameStarted && Input.GetMouseButtonDown(0)&&!EventSystem.current.IsPointerOverGameObject())
+            StartGame();
 
         if (_pauseGameHandler.IsGamePaused && Input.GetMouseButtonDown(0))
             _pauseGameHandler.Pause();
-        if (_playerMovement.transform.position.y <= -1.2f) FinishGame();
+        if (_playerMovement.transform.position.y <= 1f)
+            FinishGame();
     }
 
     private void StartGame()
@@ -74,6 +84,7 @@ public class GameManager : MonoBehaviour
         _inGameUI.ShowUI();
         _levelGenerator.enabled = true;
         _playerMovement.enabled = true;
+
     }
 
     private void FinishGame()
@@ -81,5 +92,10 @@ public class GameManager : MonoBehaviour
         _inGameUI.HideUI();
         OnGameFinishCommand();
         _gameOverUI.ShowUI();
+    }
+
+    public void EnableCheatMode(bool value)
+    {
+        isCheatModeEnabled = value;
     }
 }
