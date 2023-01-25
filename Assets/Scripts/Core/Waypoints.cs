@@ -24,18 +24,18 @@ public class Waypoints : MonoBehaviour
             if (currentWaypoint == null)
             {
 
-                return _levelGenerator.PlatformsStack[_levelGenerator.PlatformsStack.Count - 1].transform;
+                return _levelGenerator.PlatformsList[_levelGenerator.PlatformsList.Count - 1].transform;
             }
 
-            if (currentWaypoint.GetSiblingIndex() < _levelGenerator.PlatformsStack.Count - 1)
+            if (currentWaypoint.GetSiblingIndex() < _levelGenerator.PlatformsList.Count - 1)
             {
 
-                return _levelGenerator.PlatformsStack[currentWaypoint.GetSiblingIndex() + 1].transform;
+                return _levelGenerator.PlatformsList[currentWaypoint.GetSiblingIndex() + 1].transform;
             }
             else
             {
 
-                return _levelGenerator.PlatformsStack[_levelGenerator.PlatformsStack.Count - 1].transform;
+                return _levelGenerator.PlatformsList[_levelGenerator.PlatformsList.Count - 1].transform;
             }
 
 

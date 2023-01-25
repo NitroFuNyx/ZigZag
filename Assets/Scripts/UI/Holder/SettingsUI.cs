@@ -1,13 +1,14 @@
-
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
-using Button = UnityEngine.UI.Button;
 
-public class SettingsUI: UIControllerBase
+public class SettingsUI : UIControllerBase
 {
-    [SerializeField] private GameObject backButton;// it needs to write a custom editor to write button instead of GO
-    [SerializeField] private GameObject settingsButton;// it needs to write a custom editor to write button instead of GO
+    [SerializeField] private GameObject backButton; // it needs to write a custom editor to write button instead of GO
+
+    [SerializeField]
+    private GameObject settingsButton; // it needs to write a custom editor to write button instead of GO
+
     private GameManager _manager;
     private StartGameUI _startGameUI;
 
@@ -18,7 +19,7 @@ public class SettingsUI: UIControllerBase
     }
 
     [Inject]
-    private void InjectDependencies(GameManager manager,StartGameUI startGameUI)
+    private void InjectDependencies(GameManager manager, StartGameUI startGameUI)
     {
         _startGameUI = startGameUI;
         _manager = manager;
@@ -28,14 +29,12 @@ public class SettingsUI: UIControllerBase
     {
         base.HideUI();
         _startGameUI.ShowUI();
-
     }
 
     public override void ShowUI()
     {
         base.ShowUI();
         _startGameUI.HideUI();
-
     }
 
     public void EnableCheatMode(bool value)

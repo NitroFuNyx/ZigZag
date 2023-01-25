@@ -3,11 +3,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Button = UnityEngine.UI.Button;
 
-public class GameOverUI : UIControllerBase,IUIUpdater
+public class GameOverUI : UIControllerBase, IUIUpdater
 {
-    [SerializeField] private GameObject restartButton;// it needs to write a custom editor to write button instead of GO
+    [SerializeField]
+    private GameObject restartButton; // it needs to write a custom editor to write button instead of GO
+
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI bestScoreText;
+
     private void Start()
     {
         restartButton.GetComponent<Button>().onClick.AddListener(RestartGame);
@@ -18,14 +21,14 @@ public class GameOverUI : UIControllerBase,IUIUpdater
         SceneManager.LoadScene(0);
     }
 
-    
+
     public void UpdateScore(string text)
     {
         scoreText.text = text;
     }
+
     public void UpdateBestScoreText(string text)
     {
         bestScoreText.text = text;
     }
-    
 }

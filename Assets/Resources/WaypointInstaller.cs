@@ -3,9 +3,9 @@ using Zenject;
 
 public class WaypointInstaller : MonoInstaller
 {
-    [SerializeField] private WaypointMover _waypointMover;
+    [SerializeField] private WaypointMover waypointMover;
     public override void InstallBindings()
     {
-        Container.Bind<WaypointMover>().FromInstance(_waypointMover).AsSingle().NonLazy();
+        Container.Bind<WaypointMover>().FromInstance(waypointMover).AsSingle().NonLazy();
     }
 }

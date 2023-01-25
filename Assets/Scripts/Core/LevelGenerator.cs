@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
-using Random = UnityEngine.Random;
 
 public class LevelGenerator : MonoBehaviour
 {
@@ -14,22 +12,28 @@ public class LevelGenerator : MonoBehaviour
     private Vector3 _newPosition;
 
     private bool _isStopped;
+    
     private PlayerScore _playerScore;
     private GameManager _gameManager;
     private PauseGameHandler _pauseGameHandler;
     private SoundManager _soundManager;
-
-    [SerializeField] private List<GemHolder> _platformsStack = new List<GemHolder>();
     private WaypointMover _waypointMover;
 
-    public List<GemHolder> PlatformsStack => _platformsStack;
+    [SerializeField] private List<GemHolder> platformsList = new List<GemHolder>();
+
+    public LevelGenerator(bool isStopped)
+    {
+        _isStopped = isStopped;
+    }
+
+    public List<GemHolder> PlatformsList => platformsList;
 
 
     #region ZenJect
 
     [Inject]
     private void InjectDependencies(PlayerScore playerScore, GameManager gameManager, PauseGameHandler pauseGameHandler,
-        SoundManager soundManager,WaypointMover waypointMover)
+        SoundManager soundManager, WaypointMover waypointMover)
     {
         _waypointMover = waypointMover;
         _soundManager = soundManager;
@@ -39,7 +43,9 @@ public class LevelGenerator : MonoBehaviour
     }
 
     #endregion
+
     #region Event subscription
+
     private void OnEnable()
     {
         _gameManager.OnGameFinish += FinishGame;
@@ -51,6 +57,7 @@ public class LevelGenerator : MonoBehaviour
         _gameManager.OnGameFinish -= FinishGame;
         _gameManager.OnGameStart -= StartGame;
     }
+
     #endregion
 
     private void Awake()
@@ -72,30 +79,23 @@ public class LevelGenerator : MonoBehaviour
     {
         _newPosition = _lastPosition;
         var rand = Random.Range(0, 2);
-        if (rand > 0 || PlatformsStack.Count == 1)
-        {
+        if (rand > 0 || PlatformsList.Count == 1)
             _newPosition.x += 2f;
-            
-        }
         else
-        {
             _newPosition.z += 2f;
-        }
-        
-
     }
 
     private IEnumerator SpawnPlatform()
     {
         while (!_isStopped)
         {
-            if (!_pauseGameHandler.IsGamePaused&&PlatformsStack.Count<=35)
+            if (!_pauseGameHandler.IsGamePaused && PlatformsList.Count <= 35)
             {
                 GenerateNewPosition();
                 var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform.GetChild(0));
 
                 _lastPosition = _newPosition;
-                PlatformsStack.Add(platform);
+                PlatformsList.Add(platform);
                 _waypointMover.AddWaypoint(platform.transform);
                 if (Random.Range(0f, 100f) > 85f)
                 {
@@ -122,7 +122,7 @@ public class LevelGenerator : MonoBehaviour
             var platform = Instantiate(platformPrefab, _newPosition, Quaternion.identity, transform.GetChild(0));
 
             _lastPosition = _newPosition;
-            PlatformsStack.Add(platform);
+            PlatformsList.Add(platform);
             _waypointMover.AddWaypoint(platform.transform);
 
             if (Random.Range(0f, 100f) > 85f)
@@ -132,6 +132,7 @@ public class LevelGenerator : MonoBehaviour
                 platform.Handler.OnBeingCaptured += _playerScore.PointAcquiredReaction;
                 platform.Handler.OnBeingCaptured += _soundManager.PlaySoundCoin;
             }
+
             platform.Cleaner.OnDestroy += RemoveFromList;
             yield return null;
         }
@@ -144,14 +145,9 @@ public class LevelGenerator : MonoBehaviour
 
     private void RemoveFromList()
     {
-        PlatformsStack.RemoveAt(0);
-        for(var i = PlatformsStack.Count - 1; i > -1; i--)
-        {
-            if (PlatformsStack[i] == null)
-                PlatformsStack.RemoveAt(i);
-        }
+        PlatformsList.RemoveAt(0);
+        for (var i = PlatformsList.Count - 1; i > -1; i--)
+            if (PlatformsList[i] == null)
+                PlatformsList.RemoveAt(i);
     }
-
-   
-    
 }

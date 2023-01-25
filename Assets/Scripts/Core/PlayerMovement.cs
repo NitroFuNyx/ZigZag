@@ -4,7 +4,7 @@ using Zenject;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField]private float moveSpeed=6;
+    [SerializeField] private float moveSpeed = 6;
     private bool _isFacedRight = true;
     private GameManager _gameManager;
     private PauseGameHandler _pauseGameHandler;
@@ -26,17 +26,11 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         if (!_pauseGameHandler.IsGamePaused)
-        {
-
-            if(!_gameManager.CheatMode)
+            if (!_gameManager.CheatMode)
             {
                 Move();
-
                 GetRotationInput();
-                
             }
-
-        }
     }
 
     #region Event subscription
@@ -52,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     #endregion
-    
+
 
     private void FinishGame()
     {
